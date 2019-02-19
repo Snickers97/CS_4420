@@ -1,12 +1,13 @@
 #include <iostream>
 #include <dirent.h>
+#include <fstream>
 
 using namespace std;
 
 int main(int argc, char **argv){
     //Input stuff
     cout<<"PID                    Command   State    %CPU       %MEM       VSZ       RSS       Core"<<endl;
-    int pid = 1;
+    long pid;
     struct dirent *ep;
     DIR *dp;
     dp = opendir ("/proc");
@@ -14,10 +15,13 @@ int main(int argc, char **argv){
         while (ep = readdir (dp)){
             pid = strtol(ep->d_name, NULL, 10);
             if( ( ep->d_type == DT_DIR ) && ( pid > 0) ){
-                printf("directory name: %s\n", ep->d_name);
+                //printf("directory name: %s\n", ep->d_name);
                 // Do something with the proc directory
+                //string statfile = 
+                ifstream in;
+                in.open("/proc/"+pid+"/stat");
             }
-            closedir(dp);
+            //closedir(dp);
         }
     }
     else{
