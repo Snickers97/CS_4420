@@ -1,6 +1,7 @@
 #include <iostream>
 #include <dirent.h>
 #include <fstream>
+#include <string.h>
 
 using namespace std;
 
@@ -8,7 +9,7 @@ void output(string str[8]);
 
 int main(int argc, char **argv){
     //Input stuff
-    cout<<"PID            Command         State    %CPU       %MEM       VSZ       RSS       Core"<<endl;
+    cout<<"PID            Command                 State    %CPU       %MEM       VSZ       RSS       Core"<<endl;
     long pid;
     struct dirent *ep;
     DIR *dp;
@@ -26,7 +27,9 @@ int main(int argc, char **argv){
                     exit(-1);
                 }
                 string str[8];
-                for(int i = 0; i < 8; i++){
+                in>>str[0];
+                in>>strtok(str[1],"()");
+                for(int i = 2; i < 8; i++){
                     in>>str[i];
                 }
                 output(str);
@@ -48,5 +51,9 @@ void output(string str[8]){
     for(int i = 0; i < 14-str[0].size(); i++){
         cout<<" ";
     }
-    cout<<str[1]<<endl;
+    cout<<str[1];
+    for(int i = 0; i < 25-str[1].size(); i++){
+        cout<<" ";
+    }
+    cout<<str[2]<<endl;
 }
