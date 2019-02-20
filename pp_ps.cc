@@ -42,7 +42,9 @@ int main(int argc, char **argv){
                 percent_c.push_back(0);
                 percent_m.push_back(0);
                 output.push_back(inp(piddir, percent_c[i], percent_m[i]));
-                cout<<output[i]<<endl;
+                if(input == "-pid"){
+                    cout<<output[i]<<endl;
+                }
                 i++;
             }
             //closedir(dp);
@@ -53,6 +55,12 @@ int main(int argc, char **argv){
     else{
         perror("Couldn't open the directory");
         exit(-1);
+    }
+    if(input == "-com"){
+        vector<string> output2 = output;
+        for(int i = 0; i < output.size(); i++){
+            output2[i] = output[i].substr(14, output.size());
+        }
     }
     return 0;
 }
