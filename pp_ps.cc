@@ -4,10 +4,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <iomanip>
+#include <vector>
 
 using namespace std;
 
-void inp(string piddir);
+string inp(string piddir, double &percent_c, double &percent_m);
 double cpu_calc(string str[52]);
 double mem_calc(string str[52]);
 
@@ -24,6 +25,10 @@ int main(int argc, char **argv){
     //Input stuff
     cout<<"PID           Command                 State    %CPU         %MEM       VSZ            RSS            Core"<<endl;
     long pid;
+    vector<string> output;
+    vector<double> percent_c;
+    vector<double> percent_m;
+    int i = 0;
     struct dirent *ep;
     DIR *dp;
     dp = opendir ("/proc");
@@ -34,7 +39,11 @@ int main(int argc, char **argv){
                 //printf("directory name: %s\n", ep->d_name);
                 // Do something with the proc directory
                 string piddir = string(ep->d_name);
-                inp(piddir);
+                percent_c.push_back(0);
+                percent_m.push_back(0);
+                output.push_back(inp(piddir, percent_c[i], percent_m[i]));
+                cout<<output[i]<<endl;
+                i++;
             }
             //closedir(dp);
             //This line gave me trouble so I commented it out
@@ -48,7 +57,7 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void inp(string piddir){
+string inp(string piddir, double &percent_c, double &percent_m){
     ifstream in;
     in.open("/proc/" + piddir + "/stat");
     if(!in){
@@ -73,43 +82,30 @@ void inp(string piddir){
         in>>str[i];
     }
     in.close();
-    double percent_c = cpu_calc(str);
-    double percent_m = mem_calc(str);
-    cout<<str[0];
+    percent_c = cpu_calc(str);
+    percent_m = mem_calc(str);
+    string output = str[0];
     for(int i = 0; i < 14-str[0].size(); i++){
-        cout<<' ';
+        output+=' ';
     }
-    cout<<str[1];
+    output+=str[1];
     for(int i = 0; i < 24-str[1].size(); i++){
-        cout<<' ';
+        output+=' ';
     }
-    cout<<str[2]<<"        "<<setprecision(4)<<fixed<<percent_c;
-    string length_test = to_string(percent_c);
-    int length = 0;
-    for(int i = 0; length_test[i] != '.'; i++){
-        length++;
-    }
-    for(int i = 0; i < 8 - length; i++){
-        cout<<' ';
-    }
-    cout<<setprecision(4)<<fixed<<percent_m;
-    length_test = to_string(percent_m);
-    length = 0;
-    for(int i = 0; length_test[i] != '.'; i++){
-        length++;
-    }
-    for(int i = 0; i < 6 - length; i++){
-        cout<<' ';
-    }
-    cout<<str[22];
+    output+=str[2] + "        " + to_string(percent_c).substr(0,5);
+    output+="        ";
+    output+=to_string(percent_m).substr(0,5);
+    output+="      ";
+    output+=str[22];
     for(int i = 0; i < 15 - str[22].size(); i++){
-        cout<<' ';
+        output+=' ';
     }
-    cout<<str[23];
+    output+=str[23];
     for(int i = 0; i < 15 - str[23].size(); i++){
-        cout<<' ';
+        output+=' ';
     }
-    cout<<str[38]<<endl;
+    output+=str[38];
+    return output;
 }
 
 double cpu_calc(string str[52]){
