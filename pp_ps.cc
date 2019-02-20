@@ -7,11 +7,20 @@
 
 using namespace std;
 
-void in_out(string piddir);
+void inp(string piddir);
 double cpu_calc(string str[52]);
 double mem_calc(string str[52]);
 
 int main(int argc, char **argv){
+    if(argc != 2){
+        cout<<"Usage: ./pp_ps [-cpu|-mem|-pid|-com]\n";
+        return 0;
+    }
+    string input = argv[1];
+    if(input != "-cpu" && input != "-mem" && input != "-pid" && input != "-com"){
+        cout<<"Usage: ./pp_ps [-cpu|-mem|-pid|-com]\n";
+        return 0;
+    }
     //Input stuff
     cout<<"PID           Command                 State    %CPU         %MEM       VSZ            RSS            Core"<<endl;
     long pid;
@@ -25,7 +34,7 @@ int main(int argc, char **argv){
                 //printf("directory name: %s\n", ep->d_name);
                 // Do something with the proc directory
                 string piddir = string(ep->d_name);
-                in_out(piddir);
+                inp(piddir);
             }
             //closedir(dp);
             //This line gave me trouble so I commented it out
@@ -39,7 +48,7 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void in_out(string piddir){
+void inp(string piddir){
     ifstream in;
     in.open("/proc/" + piddir + "/stat");
     if(!in){
