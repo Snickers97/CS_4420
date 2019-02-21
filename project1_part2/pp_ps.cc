@@ -1,3 +1,5 @@
+//Warning: this code is very ugly
+//It works but it's a mess to look at sorry
 #include <iostream>
 #include <dirent.h>
 #include <fstream>
@@ -5,12 +7,15 @@
 #include <unistd.h>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 string inp(string piddir, double &percent_c, double &percent_m);
 double cpu_calc(string str[52]);
 double mem_calc(string str[52]);
+void pairsort(vector<string> &a,vector<string> &b, int n);
+void pairsort_cpu(vector<double> &a, vector<string> &b, int n);
 
 int main(int argc, char **argv){
     if(argc != 2){
@@ -22,7 +27,6 @@ int main(int argc, char **argv){
         cout<<"Usage: ./pp_ps [-cpu|-mem|-pid|-com]\n";
         return 0;
     }
-    //Input stuff
     cout<<"PID           Command                 State    %CPU         %MEM       VSZ            RSS            Core"<<endl;
     long pid;
     vector<string> output;
@@ -56,11 +60,19 @@ int main(int argc, char **argv){
         perror("Couldn't open the directory");
         exit(-1);
     }
+    int n = output.size();
     if(input == "-com"){
         vector<string> output2 = output;
         for(int i = 0; i < output.size(); i++){
             output2[i] = output[i].substr(14, output.size());
         }
+        pairsort(output2, output, n);
+    }
+    else if(input == "-cpu"){
+        pairsort_cpu(percent_c, output, n);
+    }
+    else if(input == "-mem"){
+        pairsort_cpu(percent_m, output, n);
     }
     return 0;
 }
@@ -116,6 +128,7 @@ string inp(string piddir, double &percent_c, double &percent_m){
     return output;
 }
 
+//Based on the formula in the handout
 double cpu_calc(string str[52]){
     ifstream in;
     double utime, stime, process_time, starttime, uptime, realtime, percent_c;
@@ -135,6 +148,7 @@ double cpu_calc(string str[52]){
     return percent_c;
 }
 
+//Based on handout
 double mem_calc(string str[52]){
     double rss, percent_m;
     long phys_pages, pagesize, phys_memsize;
@@ -144,4 +158,45 @@ double mem_calc(string str[52]){
     phys_memsize = phys_pages * pagesize;
     percent_m = (rss * pagesize * 100) / phys_memsize;
     return percent_m;
+}
+
+
+void pairsort(vector<string> &a,vector<string> &b, int n) {
+    pair<string, string> pairt[n];
+    // Storing the respective array
+    // elements in pairs.
+    for (int i = 0; i < n; i++)  {
+        pairt[i].first = a[i];
+        pairt[i].second = b[i];
+    }
+
+    // Sorting the pair array.
+    sort(pairt, pairt + n);
+
+    // Modifying original arrays
+    for (int i = 0; i < n; i++)  {
+        a[i] = pairt[i].first;
+        b[i] = pairt[i].second;
+        cout<<b[i]<<endl;
+    }
+}
+
+void pairsort_cpu(vector<double> &a, vector<string> &b, int n){
+    pair<double, string> pairt[n];
+    // Storing the respective array
+    // elements in pairs.
+    for (int i = 0; i < n; i++)  {
+        pairt[i].first = a[i];
+        pairt[i].second = b[i];
+    }
+
+    // Sorting the pair array.
+    sort(pairt, pairt + n);
+
+    // Modifying original arrays
+    for (int i = n-1; i>=0 ; i--)  {
+        a[i] = pairt[i].first;
+        b[i] = pairt[i].second;
+        cout<<b[i]<<endl;
+    }
 }
