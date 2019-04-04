@@ -21,11 +21,11 @@ int main(){
     int pid_p = getpid();
     if(pid_c != 0){    //parent process
         while(1){
-            read(fd[0], msg.message_text, MSG_LENGTH);
+            read(fd[0], (char *) &msg, sizeof(msg));
             if(msg.type == REGULAR){
-                printf("server (PID:%d) received string:\n",pid_p);
-                printf(msg.message_text);
-                printf("from client (PID:%d)\n",pid_c);
+                printf("\nserver (PID:%d) received string:\n",pid_p);
+                printf("%s",msg.message_text);
+                printf("from client (PID:%d)\n\n",pid_c);
             }
             else if(msg.type == COMMAND){
                 printf("server (PID:%d) exits\n",pid_p);
@@ -37,20 +37,27 @@ int main(){
     else{           //child process
         char msgtype[3];        //checks what type of message
         printf("Enter a line of text\n");
+        printf("Type 'send: <message>' to send a message or 'exit' to exit.\n");
         while(1){
-            fgets(msgtype,6,stdin);
-            fgets(msg.message_text,100,stdin);
-            if(msgtype == "send"){
+            //printf("Enter a line of text\n");
+            fgets(msgtype,7,stdin);     //gets the message type, including colon and space
+            //send message
+            if(msgtype[0] == 's' && msgtype[1] == 'e' && msgtype[2] == 'n' && msgtype[3] == 'd'){
+                //I really hate C sometimes and would have preferred to use the C++ str.substr() method
+                //This was the easiest way I could think of to check this in C
                 msg.type = REGULAR;
+                fgets(msg.message_text,100,stdin);
+                write(fd[1], (char *) &msg, sizeof(msg));
             }
-            else if(msgtype == "exit"){
+            //exit
+            else if(msgtype[0] == 'e' && msgtype[1] == 'x' && msgtype[2] == 'i' && msgtype[3] == 't'){
                 msg.type = COMMAND;
-            }
-            //printf("Type: %s\n",msg.type);
-            write(fd[1], msg.message_text, MSG_LENGTH);
-            if(msg.type == COMMAND){
+                write(fd[1], (char *) &msg, sizeof(msg));
                 break;
             }
+            //User did not enter either send or exit:
+            else
+                continue;
         }
 
         _exit(0);
